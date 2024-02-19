@@ -1,0 +1,20 @@
+{
+    "commands": [
+        {
+            "name": "g",
+            "aliases": ["google"],
+            "url": "https://google.com",
+            "url_with_params": "https://google.com/search?q=%s",
+            "description": "Search on Google",
+            "usage": "g [search terms]"
+        },
+        {
+            "name": "so",
+            "aliases": ["stackoverflow"],
+            "url": "https://stackoverflow.com",
+            "url_with_params": "https://stackoverflow.com/search?q=%s",
+            "description": "Search on StackOverflow",
+            "usage": "so [search terms]"
+        }
+    ]
+}
