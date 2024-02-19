@@ -1,0 +1,34 @@
+<html>
+ <head>
+  <title>Command list</title>
+ </head>
+  <body>
+  <style>
+   body {
+    background-color: #282828;
+    color: white;
+   }
+   table, th, td {
+    border: 1px solid black;
+   }
+  </style>
+  <div>
+   <h1>Command list</h1>
+   <img src="data:image/png;base64,{{.Icon}}" />
+   <table>
+    <thead>
+     <tr><td>Command</td><td>Aliases</td><td>Description</td><td>Usage</td></tr>
+    </thead>
+      <tr>
+        <td><a href="/?q=list">list</a></td><td>help</td><td>Show this
+        page</td><td></td>
+      </tr>
+    {{range $c := .Commands}}
+      <tr>
+        <td><a href="/?q={{$c.Name}}">{{$c.Name}}</a></td><td>{{join $c.Aliases ", "}}</td><td>{{$c.Description}}</td><td>{{$c.Usage}}</td>
+      </tr>
+    {{end}}
+   </table>
+  </div>
+  </body>
+</html>
