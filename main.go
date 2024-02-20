@@ -106,6 +106,8 @@ func makeHandler(cmds []Command) (func(http.ResponseWriter, *http.Request), erro
 			// FIXME(insomniacslk) check that URLWithParams contains a %s and
 			// just one.
 			u = fmt.Sprintf(cmd.URLWithParams, url.QueryEscape(cmdArg))
+		} else {
+			u = cmd.URL
 		}
 		log.Printf("Redirecting to '%s'", u)
 		http.Redirect(w, r, u, http.StatusSeeOther)
