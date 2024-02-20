@@ -29,6 +29,7 @@
       </tr>
     {{end}}
    </table>
+   {{ if ne .Maintainers nil }}For any issues please contact {{join .Maintainers ", "}}{{end}}
   </div>
   </body>
 </html>

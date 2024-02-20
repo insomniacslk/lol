@@ -28,7 +28,8 @@ var cmdDirectoryTemplate string
 var iconBytes []byte
 
 type Config struct {
-	Commands []Command `json:"commands"`
+	Maintainers []string
+	Commands    []Command `json:"commands"`
 }
 
 type Command struct {
@@ -43,11 +44,11 @@ type Command struct {
 	Usage         string   `json:"usage,omitempty"`
 }
 
-func makeHandler(cmds []Command) (func(http.ResponseWriter, *http.Request), error) {
+func makeHandler(cfg *Config) (func(http.ResponseWriter, *http.Request), error) {
 	// build command map
 	cmdMap := make(map[string]*Command)
 	var defaultCmd *Command
-	for _, cmd := range cmds {
+	for _, cmd := range cfg.Commands {
 		if cmd.Default {
 			if defaultCmd != nil {
 				return nil, fmt.Errorf("found more than one default command in configuration")
@@ -84,11 +85,13 @@ func makeHandler(cmds []Command) (func(http.ResponseWriter, *http.Request), erro
 			iconBase64 := base64.StdEncoding.EncodeToString(iconBytes)
 			var html bytes.Buffer
 			data := struct {
-				Commands []Command
-				Icon     string
+				Commands    []Command
+				Maintainers []string
+				Icon        string
 			}{
-				Commands: cmds,
-				Icon:     iconBase64,
+				Commands:    cfg.Commands,
+				Maintainers: cfg.Maintainers,
+				Icon:        iconBase64,
 			}
 			if err := tpl.Execute(&html, data); err != nil {
 				log.Printf("Failed to generate page: template failed: %v", err)
@@ -145,7 +148,7 @@ func main() {
 	}
 	log.Printf("Loaded %d terms", len(config.Commands))
 
-	cmdHandler, err := makeHandler(config.Commands)
+	cmdHandler, err := makeHandler(config)
 	if err != nil {
 		log.Fatalf("Failed to make handler: %v", err)
 	}
