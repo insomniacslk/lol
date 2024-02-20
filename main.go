@@ -90,8 +90,16 @@ func makeHandler(cmds []Command) (func(http.ResponseWriter, *http.Request), erro
 				Commands: cmds,
 				Icon:     iconBase64,
 			}
-			tpl.Execute(&html, data)
-			fmt.Fprintf(w, html.String())
+			if err := tpl.Execute(&html, data); err != nil {
+				log.Printf("Failed to generate page: template failed: %v", err)
+				if _, err := fmt.Fprintf(w, "Failed to generate page, check logs"); err != nil {
+					log.Printf("Failed to write HTML reply: %v", err)
+				}
+				return
+			}
+			if _, err := fmt.Fprint(w, html.String()); err != nil {
+				log.Printf("Failed to write HTML reply: %v", err)
+			}
 			return
 		}
 
