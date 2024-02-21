@@ -29,7 +29,21 @@
       </tr>
     {{end}}
    </table>
+  </div>
+
+  <div>
    {{ if ne .Maintainers nil }}For any issues please contact {{join .Maintainers ", "}}{{end}}
   </div>
+  <div>
+   To use this service just add <em><span id="search_engine_pattern"></span></em> it as the default search engine of your browser.
+  </div>
+  <script>
+   u = new URL(location.href);
+   u.hash = '';
+   u.search = 'q=%s';
+   e = document.getElementById("search_engine_pattern");
+   e.innerHTML = u.toString();
+  </script>
+
   </body>
 </html>
