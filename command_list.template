@@ -5,8 +5,23 @@
   <body>
   <style>
    body {
-    background-color: #282828;
-    color: white;
+     background-color: #282828;
+     color: white;
+   }
+   a {
+     color: white;
+   }
+   a:link {
+     color: white;
+   }
+   a:visited {
+     color: white;
+   }
+   a:hover {
+     color: yellow;
+   }
+   a:active {
+     color: yellow;
    }
    table, th, td {
     border: 1px solid black;
