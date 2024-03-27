@@ -17,8 +17,9 @@ import (
 )
 
 var (
-	flagListen = pflag.StringP("listen", "l", "localhost:8182", "Listen host:port")
-	flagConfig = pflag.StringP("config", "c", "", "Path to config file")
+	flagListen  = pflag.StringP("listen", "l", "localhost:8182", "Listen host:port")
+	flagConfig  = pflag.StringP("config", "c", "", "Path to config file")
+	flagBaseURL = pflag.StringP("base-url", "u", "", "Base URL for search site, e.g. https://example.org")
 )
 
 //go:embed command_list.template
@@ -26,6 +27,17 @@ var cmdDirectoryTemplate string
 
 //go:embed lol.png
 var iconBytes []byte
+
+var opensearchTemplate = `<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/"
+      xmlns:moz="http://www.mozilla.org/2006/browser/search/">
+  <ShortName>LOL</ShortName>
+  <Description>LOL shortcuts</Description>
+  <Image width="16" height="16" type="image/x-icon">{{ .BaseURL }}{{ .IconPath }}</Image>
+  <Url type="text/html" template="{{ .BaseURL }}/?q={searchTerms}"/>
+  <moz:SearchForm>/</moz:SearchForm>
+</OpenSearchDescription>
+
+`
 
 type Config struct {
 	Maintainers []string
@@ -42,6 +54,41 @@ type Command struct {
 	URLWithParams string   `json:"url_with_params,omitempty"`
 	Description   string   `json:"description,omitempty"`
 	Usage         string   `json:"usage,omitempty"`
+}
+
+func iconHandler(w http.ResponseWriter, r *http.Request) {
+	if _, err := w.Write(iconBytes); err != nil {
+		log.Printf("Failed to write icon: %v", err)
+	}
+}
+
+func opensearchHandler(w http.ResponseWriter, r *http.Request) {
+	data := struct {
+		BaseURL  string
+		IconPath string
+	}{
+		BaseURL: *flagBaseURL,
+		// IconPath has to match the icon path passed to the icon
+		// HTTP handler
+		IconPath: "/icon.png",
+	}
+	tpl := template.Must(template.New("opensearch").Parse(opensearchTemplate))
+	var html bytes.Buffer
+	if err := tpl.Execute(&html, data); err != nil {
+		log.Printf("Failed to generate page: template failed: %v", err)
+		if _, err := fmt.Fprintf(w, "Failed to generate page, check logs"); err != nil {
+			log.Printf("Failed to write HTML reply: %v", err)
+		}
+		return
+	}
+	if _, err := fmt.Fprint(w, html.String()); err != nil {
+		log.Printf("Failed to write HTML reply: %v", err)
+	}
+	return
+
+	if _, err := w.Write(iconBytes); err != nil {
+		log.Printf("Failed to write icon: %v", err)
+	}
 }
 
 func makeHandler(cfg *Config) (func(http.ResponseWriter, *http.Request), error) {
@@ -153,6 +200,8 @@ func main() {
 		log.Fatalf("Failed to make handler: %v", err)
 	}
 	http.HandleFunc("/", cmdHandler)
+	http.HandleFunc("/icon.png", iconHandler)
+	http.HandleFunc("/opensearch.xml", opensearchHandler)
 	log.Printf("Listening on %s", *flagListen)
 	log.Fatal(http.ListenAndServe(*flagListen, nil))
 }
