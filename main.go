@@ -130,7 +130,6 @@ func makeHandler(cfg *Config) (func(http.ResponseWriter, *http.Request), error) 
 		if q == "" || q == "list" || q == "help" {
 			// show command list
 			sort.Slice(cfg.Commands, func(i, j int) bool { return cfg.Commands[i].Name < cfg.Commands[j].Name })
-			// TODO sort commands
 			iconBase64 := base64.StdEncoding.EncodeToString(iconBytes)
 			var html bytes.Buffer
 			data := struct {
