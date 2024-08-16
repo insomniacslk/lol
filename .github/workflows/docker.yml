@@ -3,7 +3,7 @@ name: Docker push
 on:
   push:
     branches:
-      - master
+      - main
 
 
 jobs:
@@ -13,7 +13,7 @@ jobs:
       DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKER_PASS: ${{ secrets.DOCKERHUB_PASSWORD }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 2
       - name: Login to Docker hub
