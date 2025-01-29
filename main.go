@@ -4,7 +4,6 @@ import (
 	"bytes"
 	_ "embed"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -15,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/spf13/pflag"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -42,19 +42,19 @@ var opensearchTemplate = `<OpenSearchDescription xmlns="http://a9.com/-/spec/ope
 
 type Config struct {
 	Maintainers []string
-	Commands    []Command `json:"commands"`
+	Commands    []Command `yaml:"commands"`
 }
 
 type Command struct {
-	Name string `json:"name"`
+	Name string `yaml:"name"`
 	// Default must be set to true for exactly one command. When true, this
 	// command is used when no command is specified.
-	Default       bool     `json:"default"`
-	Aliases       []string `json:"aliases,omitempty"`
-	URL           string   `json:"url"`
-	URLWithParams string   `json:"url_with_params,omitempty"`
-	Description   string   `json:"description,omitempty"`
-	Usage         string   `json:"usage,omitempty"`
+	Default       bool     `yaml:"default"`
+	Aliases       []string `yaml:"aliases,omitempty"`
+	URL           string   `yaml:"url"`
+	URLWithParams string   `yaml:"url_with_params"`
+	Description   string   `yaml:"description,omitempty"`
+	Usage         string   `yaml:"usage,omitempty"`
 }
 
 func iconHandler(w http.ResponseWriter, r *http.Request) {
@@ -179,7 +179,7 @@ func loadConfig(path string) (*Config, error) {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
 	var cfg Config
-	if err := json.Unmarshal(data, &cfg); err != nil {
+	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 	return &cfg, nil
