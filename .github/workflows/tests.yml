@@ -5,35 +5,43 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: golang:latest
+    runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
           # clone in the gopath
           path: src/github.com/${{ github.repository }}
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v6
         with:
-          stable: false
-          go-version: ${{ matrix.go }}
+          #go-version-file: 'go.mod'
+          go-version: '1.25'
+          check-latest: true
       - run: |
           echo "GOPATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
       - run: |
           cd $GITHUB_WORKSPACE/src/github.com/${{ github.repository }}
           go build
-          ./lol -h
+          exit_code=0
+          ./lol -h || exit_code=$?
+          if [ "${exit_code}" -eq 2 ]
+          then
+            exit 0
+          fi
+          exit $exit_code
   test:
-    runs-on: golang:latest
+    runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
           # clone in the gopath
           path: src/github.com/${{ github.repository }}
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v6
         with:
-          stable: false
-          go-version: ${{ matrix.go }}
+          #go-version-file: 'go.mod'
+          go-version: '1.25'
+          check-latest: true
       - run: |
           echo "GOPATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
       - run: |

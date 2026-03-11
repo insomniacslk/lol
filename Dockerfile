@@ -1,13 +1,22 @@
-from golang:1.22
+FROM golang:1.22 AS builder
 
-LABEL BUILD="docker build -t insomniacslk/lol -f Dockerfile ."
+ARG TARGETOS=linux
+ARG TARGETARCH=amd64
+
+LABEL BUILD="docker buildx build --platform linux/amd64,linux/arm64 -t insomniacslk/lol -f Dockerfile ."
 LABEL RUN="docker run --rm -it insomniacslk/lol"
 
 WORKDIR /app
 
-ADD . .
+COPY . .
 
-RUN go build
-RUN mv config.json.example config.json
+RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o lol .
 
-ENTRYPOINT ["/app/lol", "-c", "/app/config.json"]
+FROM debian:bookworm-slim
+
+WORKDIR /app
+
+COPY --from=builder /app/lol /app/lol
+COPY config.yaml.example /app/config.yaml
+
+ENTRYPOINT ["/app/lol", "-c", "/app/config.yaml"]
