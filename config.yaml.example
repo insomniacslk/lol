@@ -1,15 +1,63 @@
-commands:
-  - name: g
-    aliases:
-      - google
-    url: https://google.com
-    url_with_params: https://google.com/search?q=%s
-    description: Search on Google
-    usage: g [search terms]
-  - name: so
-    aliases:
-      - stackoverflow
-    url: https://stackoverflow.com
-    url_with_params: https://stackoverflow.com/search?q=%s
-    description: Search on StackOverflow
-    usage: so [search terms]
+maintainers:
+  - someone@example.org
+
+# Common commands are available in every profile, and are also served on
+# their own when no profile is selected via -p/--profile. They are also
+# kept (for backward compatibility) if placed at the top level under
+# `commands:`.
+common:
+  commands:
+    - name: g
+      default: true
+      aliases:
+        - google
+      url: https://google.com
+      url_with_params: https://google.com/search?q=%s
+      description: Search on Google
+      usage: g [search terms]
+    - name: so
+      aliases:
+        - stackoverflow
+      url: https://stackoverflow.com
+      url_with_params: https://stackoverflow.com/search?q=%s
+      description: Search on StackOverflow
+      usage: so [search terms]
+
+# A profile is selected at process start time via -p/--profile. Without the
+# flag, only the common commands are served. Run a separate `lol` instance
+# per profile (typically on a different port) to serve more than one.
+#
+# A profile's commands replace common commands of the same name (full
+# replacement, not field-level merge). A profile that sets `default: true`
+# on one of its commands will demote any common default that it did not
+# explicitly override.
+profiles:
+  # Inline commands: defined in this same YAML file.
+  work:
+    commands:
+      - name: jira
+        url: https://jira.example.org
+        url_with_params: https://jira.example.org/browse/%s
+        description: Open a Jira ticket
+        usage: jira [TICKET-123]
+      - name: g
+        # Overrides the common `g` command for the work profile. Note: a
+        # replacement is full-record, not field-level, so to keep this entry
+        # as the profile's default you must restate `default: true`.
+        default: true
+        url: https://search.example.org
+        url_with_params: https://search.example.org/?q=%s
+
+  # External file: loaded from disk, path is relative to this config file.
+  # The file itself is expected to be a YAML document with a top-level
+  # `commands:` key (same shape as a ProfileSection).
+  personal:
+    file: ./personal.yaml
+
+  # Combined: external file provides a base set, inline entries override or
+  # extend it by name.
+  hybrid:
+    file: ./hybrid-base.yaml
+    commands:
+      - name: extra
+        url: https://extra.example.org

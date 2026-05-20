@@ -29,7 +29,7 @@
    }
   </style>
   <div>
-   <h1>Command list</h1>
+   <h1>Command list{{ if .Profile }} &mdash; profile <em>{{ .Profile }}</em>{{ end }}</h1>
    <img src="data:image/png;base64,{{.Icon}}" />
    <table>
     <thead>
