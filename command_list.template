@@ -27,14 +27,31 @@
    table, th, td {
     border: 1px solid black;
    }
+   #filter {
+     background-color: #282828;
+     color: white;
+     border: 1px solid black;
+     padding: 0.3em;
+     width: 100%;
+     max-width: 40em;
+     box-sizing: border-box;
+   }
+   #no_matches {
+     display: none;
+   }
   </style>
   <div>
    <h1>Command list{{ if .Profile }} &mdash; profile <em>{{ .Profile }}</em>{{ end }}</h1>
    <img src="data:image/png;base64,{{.Icon}}" />
+   <p>
+    <input type="search" id="filter" autofocus autocomplete="off"
+     placeholder="Filter commands (matches name, aliases, description, usage)" />
+   </p>
    <table>
     <thead>
      <tr><td>Command</td><td>Aliases</td><td>Description</td><td>Usage</td></tr>
     </thead>
+    <tbody id="commands">
       <tr>
         <td><a href="/?q=list">list</a></td><td>help</td><td>Show this
         page</td><td></td>
@@ -44,7 +61,9 @@
         <td><a href="/?q={{$c.Name}}">{{$c.Name}}</a></td><td>{{join $c.Aliases ", "}}</td><td>{{$c.Description}}</td><td>{{$c.Usage}}</td>
       </tr>
     {{end}}
+    </tbody>
    </table>
+   <p id="no_matches">No matching commands.</p>
   </div>
 
   <div>
@@ -54,6 +73,26 @@
    To use this service just add <em><span id="search_engine_pattern"></span></em> it as the default search engine of your browser.
   </div>
   <script>
+   (function () {
+     const input = document.getElementById("filter");
+     const empty = document.getElementById("no_matches");
+     const rows = Array.from(document.querySelectorAll("#commands tr")).map(function (tr) {
+       return { tr: tr, text: tr.textContent.toLowerCase() };
+     });
+     function apply() {
+       const terms = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+       let shown = 0;
+       for (const row of rows) {
+         const match = terms.every(function (t) { return row.text.includes(t); });
+         row.tr.style.display = match ? "" : "none";
+         if (match) { shown++; }
+       }
+       empty.style.display = shown === 0 ? "" : "none";
+     }
+     input.addEventListener("input", apply);
+     apply();
+   })();
+
    u = new URL(location.href);
    u.hash = '';
    u.search = 'q=%s';
